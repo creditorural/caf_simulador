@@ -55,6 +55,8 @@
   .verdict{border-radius:8px;padding:14px 16px;margin-top:14px;border:1px solid}
   .verdict b{display:block;font-size:13px;letter-spacing:.05em;text-transform:uppercase;opacity:.85}
   .verdict strong{font-family:"Montserrat",system-ui,sans-serif;font-size:20px;display:block;margin-top:2px}
+  .verdict p{margin:6px 0 0;font-size:14.5px;color:var(--ink)}
+  .verdict p:empty{display:none}
   .ok{background:var(--green-soft);border-color:#b3dcc3;color:var(--green)}
   .bad{background:var(--red-soft);border-color:#e3bbb5;color:var(--red)}
   .warn{background:var(--amber-soft);border-color:#e6d2a3;color:var(--amber)}
@@ -163,7 +165,7 @@
         <tr class="hl"><td>Renda "considerada"<span class="n">Total sem aposentadoria rural, menos o rebate</span></td><td class="v" id="rConsid">R$ 0,00</td></tr>
       </table>
 
-      <div class="verdict" id="vPronaf"><b>Enquadramento no Pronaf</b><strong>-</strong></div>
+      <div class="verdict" id="vPronaf"><b>Enquadramento no Pronaf</b><strong>-</strong><p></p></div>
     </section>
   </div>
 
@@ -215,7 +217,7 @@
       <span class="pill warn" id="p4">A verificar</span>
     </div>
 
-    <div class="verdict" id="vGeral"><b>Situação geral</b><strong>-</strong></div>
+    <div class="verdict" id="vGeral"><b>Situação geral</b><strong>-</strong><p></p></div>
   </section>
 
   <section class="card">
@@ -223,6 +225,7 @@
     <ol style="margin:8px 0 0;padding-left:20px;font-size:15px">
       <li><b>Proporção dentro/fora (CAF):</b> a renda do estabelecimento deve ser igual ou maior que a renda fora dele. Para essa comparação, deduz-se até R$ 20.000,00 da renda fora, desde que a renda do estabelecimento seja superior a R$ 1.000,00. A dedução não altera o "Total" do extrato.</li>
       <li><b>Teto do Pronaf:</b> a renda considerada deve estar dentro do limite do programa. Para leite, olericultura, fruticultura e café aplica-se rebate de 30% sobre a renda dessas cadeias, que não aparece no extrato do CAF.</li>
+      <li><b>CAF ativa não garante Pronaf:</b> quem atende aos 4 critérios do Art. 5º pode ter a CAF ativa normalmente. Porém, se a renda considerada ficar acima do limite do Pronaf (R$ 500.000,00), mesmo depois dos rebates, a família não terá enquadramento no Pronaf.</li>
       <li><b>Benefícios sociais</b> ficam fora da proporção dentro/fora, mas entram na renda considerada do Pronaf. <b>Aposentadoria rural</b> entra na renda fora, mas não na renda considerada do Pronaf.</li>
     </ol>
     <details style="margin-top:16px">
@@ -314,7 +317,7 @@
   }
   const val = id => parse($(id).value);
   const catSum = id => { let s=0; document.querySelectorAll('input.amt[data-cat="'+id+'"]').forEach(i=>s+=parse(i.value)); $("sub_"+id).textContent=fmt(s); return s; };
-  function setVerdict(el,cls,text){ el.className="verdict "+cls; el.querySelector("strong").textContent=text; }
+  function setVerdict(el,cls,text,detail){ el.className="verdict "+cls; el.querySelector("strong").textContent=text; const p=el.querySelector("p"); if(p) p.textContent=detail||""; }
   function setPill(el,cls,text){ el.className="pill "+cls; el.textContent=text; }
 
   function calc(){
@@ -348,13 +351,15 @@
     else { setVerdict($("vCaf"),"bad","Não atende: renda fora do estabelecimento é maior"); setPill($("p3"),"bad","Não atende"); }
 
     // Pronaf
-    let pr, cls;
+    let pr, cls, prDet="";
     if(!temRenda){ pr="Informe as rendas"; cls="warn"; }
     else if(!critIII){ pr="Não enquadrado: renda fora é maior"; cls="bad"; }
     else if(consid<=limB){ pr="Grupos B e V"; cls="ok"; }
     else if(consid<=limV){ pr="Grupo V"; cls="ok"; }
-    else { pr="Não enquadrado: renda total acima do limite do Pronaf"; cls="bad"; }
-    setVerdict($("vPronaf"),cls,pr);
+    else { pr="Não enquadrado: renda acima do limite do Pronaf"; cls="bad";
+      prDet="A renda considerada ("+fmt(consid)+") passa de "+fmt(limV)+" mesmo depois dos rebates. A CAF pode continuar ativa se os 4 critérios forem atendidos, mas não há enquadramento no Pronaf."; }
+    setVerdict($("vPronaf"),cls,pr,prDet);
+    const acimaTeto = temRenda && critIII && consid>limV;
 
     // Critério I
     let totHa=0, totMf=0, preenchidas=0, incompletas=0;
@@ -380,7 +385,9 @@
     } else if(all.includes(null)){
       const pend=["I","II","III","IV"].filter((_,i)=>all[i]===null);
       setVerdict($("vGeral"),"warn","Pendente: falta verificar o critério "+pend.join(", "));
-    } else setVerdict($("vGeral"),"ok","Atende aos 4 critérios de enquadramento no CAF");
+    } else if(acimaTeto){
+      setVerdict($("vGeral"),"warn","CAF ativa, mas sem enquadramento no Pronaf","Atende aos 4 critérios do CAF, porém a renda considerada ("+fmt(consid)+") fica acima do limite de "+fmt(limV)+" mesmo depois dos rebates.");
+    } else setVerdict($("vGeral"),"ok","Atende aos 4 critérios: CAF ativa e enquadrada no Pronaf ("+pr+")");
   }
 
   function blurFmt(e){ const n=parse(e.target.value); e.target.value = e.target.value.trim()==="" ? "" : fmtN(n); }
