@@ -5,24 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simulador de Renda CAF e Pronaf</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f6f5f0; --card:#ffffff; --ink:#1f2a24; --muted:#5d6a62; --line:#dfe3dc;
-    --green:#2f6b3f; --green-soft:#e6f0e8; --red:#a3352b; --red-soft:#f7e6e3;
-    --amber:#94650f; --amber-soft:#f8efd9; --accent:#2f6b3f;
+    /* Paleta IDR-Paraná (mesma de creditorural.github.io) */
+    --azul:#1560a8; --azul-claro:#0085cc; --azul-soft:#e2edf8;
+    --verde:#00a14b; --verde-escuro:#008a52; --grafite:#455560;
+    --bg:#f3f6f5; --card:#ffffff; --ink:#2b3840; --muted:#5f6e77; --line:#dfe5e3;
+    --green:#008a52; --green-soft:#e2f4e9; --red:#a3352b; --red-soft:#f7e6e3;
+    --amber:#94650f; --amber-soft:#f8efd9; --accent:#008a52;
+    --input-line:#cdd6d3; --input-bg:#fafcfb;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;font-size:16px;line-height:1.5}
-  header{background:var(--green);color:#fff;padding:28px 20px 24px}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.5}
+  header{background:#fff;color:var(--grafite);padding:28px 20px 30px;position:relative}
+  header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:7px;background:linear-gradient(100deg,var(--azul-claro) 0,var(--azul) 72%,#fff 72% 73%,var(--verde) 73%,var(--verde-escuro) 100%)}
   header .wrap{max-width:1080px;margin:0 auto}
-  header small{opacity:.85;letter-spacing:.04em;text-transform:uppercase;font-size:12px;font-weight:600}
-  h1{font-family:"Source Serif 4",Georgia,serif;font-weight:700;font-size:30px;margin:4px 0 6px;line-height:1.2}
-  header p{margin:0;opacity:.9;max-width:720px}
+  header small{color:var(--verde-escuro);letter-spacing:.04em;text-transform:uppercase;font-size:12px;font-weight:600}
+  h1{font-family:"Montserrat",system-ui,sans-serif;font-weight:700;font-size:30px;margin:4px 0 6px;line-height:1.2}
+  header p{margin:0;color:var(--muted);max-width:720px}
   main{max-width:1080px;margin:0 auto;padding:24px 20px 48px}
-  h2{font-family:"Source Serif 4",Georgia,serif;font-size:21px;margin:0 0 4px}
+  h2{font-family:"Montserrat",system-ui,sans-serif;font-size:21px;margin:0 0 4px;color:var(--grafite)}
   .sub{color:var(--muted);margin:0 0 16px;font-size:14.5px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:20px;box-shadow:0 1px 2px rgba(11,58,91,.06),0 8px 24px rgba(11,58,91,.06)}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
   .sticky{position:sticky;top:12px}
   @media (max-width:860px){.sticky{position:static}}
@@ -35,10 +40,10 @@
   .field label span{display:block;font-size:12.5px;color:var(--muted)}
   .money{position:relative;width:180px;flex:none}
   .money::before{content:"R$";position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px}
-  input[type=text]{width:100%;padding:8px 10px 8px 34px;border:1px solid #c9cfc6;border-radius:6px;font:inherit;text-align:right;background:#fbfcfa}
+  input[type=text]{width:100%;padding:8px 10px 8px 34px;border:1px solid var(--input-line);border-radius:6px;font:inherit;text-align:right;background:var(--input-bg)}
   input.plain{padding-left:10px}
   input:focus,select:focus{outline:2px solid var(--green);outline-offset:1px;border-color:var(--green)}
-  select{padding:8px 10px;border:1px solid #c9cfc6;border-radius:6px;font:inherit;background:#fbfcfa;width:180px}
+  select{padding:8px 10px;border:1px solid var(--input-line);border-radius:6px;font:inherit;background:var(--input-bg);width:180px}
   .actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
   button{font:inherit;font-weight:600;border-radius:6px;padding:8px 14px;cursor:pointer;border:1px solid var(--green);background:#fff;color:var(--green)}
   button.primary{background:var(--green);color:#fff}
@@ -49,8 +54,8 @@
   tr.hl td{font-weight:700}
   .verdict{border-radius:8px;padding:14px 16px;margin-top:14px;border:1px solid}
   .verdict b{display:block;font-size:13px;letter-spacing:.05em;text-transform:uppercase;opacity:.85}
-  .verdict strong{font-family:"Source Serif 4",Georgia,serif;font-size:20px;display:block;margin-top:2px}
-  .ok{background:var(--green-soft);border-color:#b9d3bf;color:var(--green)}
+  .verdict strong{font-family:"Montserrat",system-ui,sans-serif;font-size:20px;display:block;margin-top:2px}
+  .ok{background:var(--green-soft);border-color:#b3dcc3;color:var(--green)}
   .bad{background:var(--red-soft);border-color:#e3bbb5;color:var(--red)}
   .warn{background:var(--amber-soft);border-color:#e6d2a3;color:var(--amber)}
   .bar{height:12px;border-radius:6px;background:var(--line);overflow:hidden;display:flex;margin:10px 0 4px}
@@ -58,7 +63,7 @@
   .legend{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted)}
   .crit{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:start;padding:16px 0;border-bottom:1px solid var(--line)}
   .crit:last-of-type{border-bottom:0}
-  .num{width:40px;height:40px;border-radius:50%;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:"Source Serif 4",Georgia,serif;font-weight:700;font-size:17px}
+  .num{width:40px;height:40px;border-radius:50%;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:"Montserrat",system-ui,sans-serif;font-weight:700;font-size:17px}
   .crit h3{margin:0;font-size:16.5px}
   .crit p{margin:4px 0 8px;color:var(--muted);font-size:14.5px}
   .crit .inputs{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:14px}
@@ -66,14 +71,14 @@
   .pill{font-size:13px;font-weight:700;border-radius:999px;padding:4px 12px;white-space:nowrap;border:1px solid}
   @media (max-width:600px){.crit{grid-template-columns:36px 1fr}.crit .pill{grid-column:2;justify-self:start}}
   .source{font-size:14.5px}
-  .source blockquote{margin:10px 0;padding:10px 14px;border-left:3px solid var(--green);background:#f9faf7;color:#33403a}
-  .source a{color:var(--green)}
+  .source blockquote{margin:10px 0;padding:10px 14px;border-left:3px solid var(--azul);background:#f5f8fb;color:#3a4850}
+  .source a{color:var(--azul)}
   .params{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px}
   .params label{font-size:14px;display:flex;flex-direction:column;gap:4px}
   .params input{width:150px}
   details summary{cursor:pointer;font-weight:600;color:var(--green)}
   .note{background:var(--amber-soft);border:1px solid #e6d2a3;color:#5e4209;border-radius:8px;padding:10px 14px;font-size:14px;margin:4px 0 8px}
-  .cat{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:10px;background:#fcfdfb}
+  .cat{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:10px;background:var(--input-bg)}
   .cat-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
   .cat-head h4{margin:0;font-size:15px}
   .cat-head h4 span{display:block;font-size:12.5px;color:var(--muted);font-weight:400}
@@ -82,7 +87,7 @@
   .amt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}
   .amt-grid .money{width:auto}
   .amt-grid input.amt{padding-top:7px;padding-bottom:7px;font-size:14px}
-  .row .desc{flex:1;min-width:0;padding:7px 10px;border:1px solid #c9cfc6;border-radius:6px;font:inherit;font-size:14px;background:#fff;text-align:left}
+  .row .desc{flex:1;min-width:0;padding:7px 10px;border:1px solid var(--input-line);border-radius:6px;font:inherit;font-size:14px;background:#fff;text-align:left}
   .row .fixed{flex:1;font-size:14px;padding-left:2px}
   .row .money{width:160px}
   .row input.amt{padding-top:7px;padding-bottom:7px;font-size:14px}
@@ -91,16 +96,16 @@
   .t-head,.t-row,.t-total{display:grid;grid-template-columns:78px minmax(0,1fr) 110px 120px 100px;gap:8px;align-items:center}
   .t-head{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding-bottom:4px}
   .t-row{margin-bottom:6px}
-  .t-row select,.t-row input{width:100%;padding:7px 8px;font-size:14px;border:1px solid #c9cfc6;border-radius:6px;background:#fbfcfa;font-family:inherit}
+  .t-row select,.t-row input{width:100%;padding:7px 8px;font-size:14px;border:1px solid var(--input-line);border-radius:6px;background:var(--input-bg);font-family:inherit}
   .t-row input{text-align:right}
-  .t-row .mfmod[readonly]{background:#eef1ec;color:var(--muted)}
+  .t-row .mfmod[readonly]{background:#e8eced;color:var(--muted)}
   .t-row .res{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
   .t-total{border-top:1px solid var(--line);padding-top:8px;margin-top:4px;font-weight:700}
   .t-total span:nth-child(3),.t-total span:nth-child(5){text-align:right;font-variant-numeric:tabular-nums}
   .t-fonte{font-size:12.5px !important;margin-top:8px !important}
   @media (max-width:700px){
     .t-head{display:none}
-    .t-row{grid-template-columns:78px 1fr;border:1px solid var(--line);border-radius:8px;padding:8px;background:#fcfdfb}
+    .t-row{grid-template-columns:78px 1fr;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--input-bg)}
     .t-row > :nth-child(3),.t-row > :nth-child(4){grid-column:span 1}
     .t-row .res{grid-column:1 / -1}
     .t-row .res::before{content:"Módulos fiscais: ";font-weight:400;color:var(--muted)}
@@ -147,7 +152,7 @@
         <tr class="hl"><td>Renda fora ajustada</td><td class="v" id="rForaAj">R$ 0,00</td></tr>
       </table>
 
-      <div class="bar" aria-hidden="true"><div id="barD" style="background:var(--green);width:50%"></div><div id="barF" style="background:#c7a35a;width:50%"></div></div>
+      <div class="bar" aria-hidden="true"><div id="barD" style="background:var(--green);width:50%"></div><div id="barF" style="background:var(--azul);width:50%"></div></div>
       <div class="legend"><span id="lgD">Dentro 0%</span><span id="lgF">Fora ajustada 0%</span></div>
 
       <div class="verdict" id="vCaf"><b>Critério de renda do CAF</b><strong>-</strong></div>
